@@ -1,6 +1,11 @@
-def print_hi(name):
-    print(f'Hi, {name}')  # Press Ctrl+8 to toggle the breakpoint.
+import os
+
+from dotenv import load_dotenv
+
+
+def load_credentials():
+    load_dotenv()
 
 
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    TOKEN = os.environ.get("TOKEN")
