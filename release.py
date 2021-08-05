@@ -1,29 +1,19 @@
 class Release:
-    pict_link = ""
-    artist = ""
-    album = ""
-    year = ""
-    genre = ""
-    country = ""
-    file = ""
-    size = ""
-    download_links = []
-
     def __init__(
         self,
-        pict_link,
+        cover_link,
         artist,
-        albun,
+        album,
         year,
         genre,
         country,
         file,
         size,
-        download_links
+        download_links,
     ):
-        self.pict_link = pict_link
+        self.cover_link = cover_link
         self.artist = artist
-        self.album = albun
+        self.album = album
         self.year = year
         self.genre = genre
         self.country = country
@@ -32,5 +22,17 @@ class Release:
         self.download_links = download_links
 
     def __str__(self):
-        # TODO implement it
-        ...
+        # TODO implement it right
+        return f"""             #image
+                    *Arist*: {self.artist}
+                    *Album*: {self.album}
+                    *Year*: {self.year}
+                    *Genre*: {self.genre}
+                    *Country*: {self.country}
+                    *File*: {self.file}
+                    *Size*: {self.size}
+                    *Links*: {' '.join(self.get_file_links())}
+        """
+
+    def get_file_links(self):
+        return [f"[link]({link})" for link in self.download_links]
