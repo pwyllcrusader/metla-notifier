@@ -22,8 +22,8 @@ class Release:
         self.download_links = download_links
 
     def __str__(self):
-        # TODO implement it right
-        return f"""             #image
+        return f"""
+                    [cover]({self.cover_link})
                     *Arist*: {self.artist}
                     *Album*: {self.album}
                     *Year*: {self.year}
