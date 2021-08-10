@@ -3,7 +3,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait
 
 
-def login(username, password):
+def get_release_links(username, password):
     time = 5
     browser = webdriver.Firefox()
     metalarea = "http://metalarea.org/"
@@ -23,11 +23,8 @@ def login(username, password):
     ).click()
     browser.find_element_by_xpath("//select[@name='topicfilter']").click()
     browser.find_element_by_xpath("//option[@name='hot']").click()
-    
-
-
-def get_release_links():
-    ...
+    links = browser.find_elements_by_xpath("//a[contains(@id,'tid-link')]")
+    return [link.get_attribute("href") for link in links]
 
 
 def parse_release():
@@ -35,6 +32,5 @@ def parse_release():
 
 
 def get_releases_list(username, password):
-    login(username, password)
-    links = get_release_links()
+    links = get_release_links(username, password)
     return [parse_release(link) for link in links]
