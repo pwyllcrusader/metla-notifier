@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 import os
 
 from dotenv import load_dotenv
@@ -10,8 +11,15 @@ USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
 
 
+def get_tlg_updates():
+    ...
+
+
+def create_db():
+    ...
+
+
 def get_release_links():
-    release_links = []
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False, slow_mo=50)
         page = browser.new_page()
@@ -27,8 +35,9 @@ def get_release_links():
         page.click(
             "//form[@method='post']/input[@class='button'][@value='Ок'][@type='submit']"
         )
-        elements = page.querySelectorAll("//a[contains(@id, 'tid-link')]")
-        release_links = [element.get_attribute("href") for element in elements]
+        page.wait_for_load_state("domcontentloaded")
+        link_elements = page.query_selector_all("//a[contains(@id, 'tid-link')]")
+        release_links = [element.get_attribute("href") for element in link_elements]
         browser.close()
     return release_links
 
@@ -42,7 +51,7 @@ def get_releases():
     return [parse_release(link) for link in links]
 
 
-def create_db():
+def send_releases(releases):
     ...
 
 
@@ -63,4 +72,7 @@ def get_chat_ids_from_db():
 
 
 if __name__ == "__main__":
-    get_release_links()
+    get_tlg_updates()
+    create_db()
+    releases = get_release_links()
+    send_releases(releases)
