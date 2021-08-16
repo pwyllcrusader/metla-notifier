@@ -1,8 +1,12 @@
 # flake8: noqa: E501
 import os
+from urllib.request import urlopen
 
+from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
+
+from release import Release
 
 # load credentials from local environment
 load_dotenv()
@@ -43,7 +47,29 @@ def get_release_links():
 
 
 def parse_release(link):
-    ...
+    html = urlopen(link)
+    soup = BeautifulSoup(html.read(), features="html.parser")
+    cover_link = soup.find("img", {"class": "linked-image"}).parent["href"]
+    artist = soup.find_all("b")[6]
+    album = soup.find_all("b")[7].next_sibling
+    year = soup.find_all("b")[8].next_sibling
+    genre = soup.find_all("b")[9].next_sibling
+    country = soup.find_all("b")[10].next_sibling
+    file = soup.find_all("b")[11].next_sibling
+    size = soup.find_all("b")[12].next_sibling
+    download_links_elements = soup.find("div", {"class": "hidemain"}).find_all("a")
+    download_links = [el["href"] for el in download_links_elements]
+    return Release(
+        cover_link,
+        artist,
+        album,
+        year,
+        genre,
+        country,
+        file,
+        size,
+        download_links,
+    )
 
 
 def get_releases():
@@ -74,5 +100,5 @@ def get_chat_ids_from_db():
 if __name__ == "__main__":
     get_tlg_updates()
     create_db()
-    releases = get_release_links()
+    releases = get_releases()
     send_releases(releases)
