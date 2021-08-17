@@ -2,7 +2,6 @@
 import os
 import sqlite3
 from time import sleep
-from urllib.request import urlopen
 
 import requests
 import telebot
@@ -17,7 +16,9 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
+# initialize telegram bot
 BOT = telebot.TeleBot(TOKEN)
+# initialize database and create tables
 DB_CONN = sqlite3.connect(os.path.dirname(os.path.realpath(__file__)) + "/ma.sqlite")
 DB = DB_CONN.cursor()
 DB.execute("CREATE TABLE IF NOT EXISTS chat_ids (id TEXT)")
@@ -60,7 +61,7 @@ def is_chat_id_is_in_db(chat_id):
 
 
 def is_release_is_in_db(release):
-    DB.execute("SELECT * FROM releases WHERE links=?", (release.download_links,))
+    DB.execute("SELECT * FROM releases WHERE links=?", (str(release.get_file_links()),))
     is_present = False
     if DB.fetchall():
         return True
@@ -101,15 +102,15 @@ def parse_release(link):
     soup = BeautifulSoup(html, features="html.parser")
 
     cover_link = soup.find("img", {"class": "linked-image"}).parent["href"]
-    artist = soup.find_all("b")[6].next
-    album = soup.find_all("b")[7].next_sibling
-    year = soup.find_all("b")[8].next_sibling
-    genre = soup.find_all("b")[9].next_sibling
-    country = soup.find_all("b")[10].next_sibling
-    file = soup.find_all("b")[11].next_sibling
-    size = soup.find_all("b")[12].next_sibling
+    artist = list(soup.find_all("b", string="Артист")[0].parent.descendants)[4].text
+    album = soup.find_all("b", string="Альбом")[0].next_sibling
+    year = soup.find_all("b", string="Год")[0].next_sibling
+    genre = soup.find_all("b", string="Стиль")[0].next_sibling
+    country = soup.find_all("b", string="Страна")[0].next_sibling
+    file = soup.find_all("b", string="Формат")[0].next_sibling
+    size = soup.find_all("b", string="Размер")[0].next_sibling
     download_links_elements = soup.find("div", {"class": "hidemain"}).find_all("a")
-    download_links = [el["href"] for el in download_links_elements][0]
+    download_links = [el["href"] for el in download_links_elements]
     return Release(
         cover_link,
         artist,
@@ -134,7 +135,7 @@ def send_releases(releases_to_send):
         for release in releases_to_send:
             if not is_release_is_in_db(release):
                 add_release_to_db(release)
-                BOT.send_message(user[0], release)
+                BOT.send_message(user[0], release, parse_mode="markdown")
                 sleep(5)
 
 
@@ -150,7 +151,7 @@ def add_release_to_db(release):
             release.country,
             release.file,
             release.size,
-            release.download_links,
+            str(release.get_file_links()),
         ),
     )
     DB_CONN.commit()

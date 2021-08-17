@@ -22,17 +22,15 @@ class Release:
         self.download_links = download_links
 
     def __str__(self):
-        return f"""
-                    [cover]({self.cover_link})
-                    *Arist*: {self.artist}
-                    *Album*: {self.album}
-                    *Year*: {self.year}
-                    *Genre*: {self.genre}
-                    *Country*: {self.country}
-                    *File*: {self.file}
-                    *Size*: {self.size}
-                    *Links*: {' '.join(self.get_file_links())}
-        """
+        return f"""[ ]({self.cover_link})
+*Arist*: {self.artist}
+*Album*: {self.album}
+*Year*: {self.year}
+*Genre*: {self.genre}
+*Country*: {self.country}
+*File*: {self.file}
+*Size*: {self.size}
+*Links*: {' '.join(self.get_file_links())}"""
 
     def get_file_links(self):
         return [f"[link]({link})" for link in self.download_links]
