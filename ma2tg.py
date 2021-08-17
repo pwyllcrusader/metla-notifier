@@ -69,7 +69,7 @@ def is_release_is_in_db(release):
 
 def get_release_links():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=50)
+        browser = p.chromium.launch()
         page = browser.new_page()
         page.goto("http://metalarea.org")
         # login
