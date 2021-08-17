@@ -1,7 +1,10 @@
 # flake8: noqa: E501
 import os
+import sqlite3
+from time import sleep
 from urllib.request import urlopen
 
+import telebot
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from playwright.sync_api import sync_playwright
@@ -13,19 +16,59 @@ load_dotenv()
 TOKEN = os.environ.get("TOKEN")
 USERNAME = os.environ.get("USERNAME")
 PASSWORD = os.environ.get("PASSWORD")
+BOT = telebot.TeleBot(TOKEN)
+DB_CONN = sqlite3.connect(os.path.dirname(os.path.realpath(__file__)) + "/ma.sqlite")
+DB = DB_CONN.cursor()
+DB.execute("CREATE TABLE IF NOT EXISTS chat_ids (id TEXT)")
+DB.execute(
+    """CREATE TABLE IF NOT EXISTS releases (
+        img_link TEXT, 
+        artist TEXT, 
+        album TEXT, 
+        year TEXT, 
+        genre TEXT,
+        country TEXT,
+        file TEXT,
+        size TEXT,
+        links TEXT
+    )"""
+)
 
 
 def get_tlg_updates():
-    ...
+    updates = BOT.get_updates()
+    for update in updates:
+        if update:
+            user_chat_id = update.message.chat.id
+            username = update.message.chat.username
+            if not is_chat_id_is_in_db(user_chat_id):
+                BOT.send_message(
+                    user_chat_id,
+                    f"Infernal hailz, {username}!",
+                )
+                DB.execute("INSERT INTO chat_ids VALUES (?)", (user_chat_id,))
+                DB_CONN.commit()
 
 
-def create_db():
-    ...
+def is_chat_id_is_in_db(chat_id):
+    DB.execute("SELECT * FROM chat_ids WHERE id=?", (chat_id,))
+    is_present = False
+    if DB.fetchall():
+        return True
+    return is_present
+
+
+def is_release_is_in_db(release):
+    DB.execute("SELECT * FROM releases WHERE links=?", (release.download_links,))
+    is_present = False
+    if DB.fetchall():
+        return True
+    return is_present
 
 
 def get_release_links():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=50)
+        browser = p.chromium.launch()
         page = browser.new_page()
         page.goto("http://metalarea.org")
         # login
@@ -72,33 +115,45 @@ def parse_release(link):
     )
 
 
-def get_releases():
+def get_releases_from_ma():
     links = get_release_links()
     return [parse_release(link) for link in links]
 
 
-def send_releases(releases):
-    ...
+def send_releases(releases_to_send):
+    users = get_chat_ids_from_db()
+    for user in users:
+        for release in releases_to_send:
+            if not is_release_is_in_db(release):
+                add_release_to_db(release)
+                BOT.send_message(user[0], release)
+                sleep(5)
 
 
 def add_release_to_db(release):
-    ...
-
-
-def get_releases_from_db():
-    ...
-
-
-def save_chat_id_to_db(chat_id):
-    ...
+    DB.execute(
+        "INSERT INTO releases VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            release.cover_link,
+            release.artist,
+            release.album,
+            release.year,
+            release.genre,
+            release.country,
+            release.file,
+            release.size,
+            release.download_links,
+        ),
+    )
+    DB_CONN.commit()
 
 
 def get_chat_ids_from_db():
-    ...
+    cursor = DB.execute("SELECT * FROM chat_ids")
+    return cursor.fetchall()
 
 
 if __name__ == "__main__":
     get_tlg_updates()
-    create_db()
-    releases = get_releases()
+    releases = get_releases_from_ma()
     send_releases(releases)
