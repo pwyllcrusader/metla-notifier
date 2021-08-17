@@ -4,6 +4,7 @@ import sqlite3
 from time import sleep
 from urllib.request import urlopen
 
+import requests
 import telebot
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
@@ -68,7 +69,7 @@ def is_release_is_in_db(release):
 
 def get_release_links():
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=False, slow_mo=50)
         page = browser.new_page()
         page.goto("http://metalarea.org")
         # login
@@ -90,10 +91,17 @@ def get_release_links():
 
 
 def parse_release(link):
-    html = urlopen(link)
-    soup = BeautifulSoup(html.read(), features="html.parser")
+    auth = {"UserName": USERNAME, "PassWord": PASSWORD}
+    session = requests.session()
+    session.post(
+        "https://metalarea.org/forum/index.php?act=Login&CODE=01&CookieDate=1&return=https://metalarea.org",
+        data=auth,
+    )
+    html = session.get(link).content
+    soup = BeautifulSoup(html, features="html.parser")
+
     cover_link = soup.find("img", {"class": "linked-image"}).parent["href"]
-    artist = soup.find_all("b")[6]
+    artist = soup.find_all("b")[6].next
     album = soup.find_all("b")[7].next_sibling
     year = soup.find_all("b")[8].next_sibling
     genre = soup.find_all("b")[9].next_sibling
@@ -101,7 +109,7 @@ def parse_release(link):
     file = soup.find_all("b")[11].next_sibling
     size = soup.find_all("b")[12].next_sibling
     download_links_elements = soup.find("div", {"class": "hidemain"}).find_all("a")
-    download_links = [el["href"] for el in download_links_elements]
+    download_links = [el["href"] for el in download_links_elements][0]
     return Release(
         cover_link,
         artist,
