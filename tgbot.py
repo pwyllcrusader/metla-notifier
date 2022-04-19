@@ -1,3 +1,0 @@
-def send_release(release):
-    ...
-

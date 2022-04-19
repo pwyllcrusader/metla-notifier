@@ -1,2 +1,5 @@
 .idea/
 .env
+.vscode/
+/ma.sqlite
+__pycache__/

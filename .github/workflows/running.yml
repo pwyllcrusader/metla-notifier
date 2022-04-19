@@ -1,0 +1,24 @@
+name: running
+
+on:
+  schedule:
+    - cron: "0 15 * * *"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+
+      - name: pulling
+        run: docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/ma2tg:latest
+
+      - name: running
+        run: |
+          docker run \
+          -e BOT_TOKEN=${{secrets.BOT_TOKEN}} \
+          -e BOT_CHAT_ID=${{secrets.BOT_CHAT_ID}} \
+          -e MA_USERNAME=${{secrets.MA_USERNAME}} \
+          -e MA_PASSWORD=${{secrets.MA_PASSWORD}} \
+          ma2tg:latest
