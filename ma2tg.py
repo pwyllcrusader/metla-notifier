@@ -49,6 +49,7 @@ def parse_release(link):
         "https://metalarea.org/forum/index.php?act=Login&CODE=01&CookieDate=1&return=https://metalarea.org",
         data=auth,
     )
+    session.headers.update({'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'})
     html = session.get(link).content
     soup = BeautifulSoup(html, features="html.parser")
     cover_link = soup.find("img", {"class": "linked-image"}).parent["href"]
