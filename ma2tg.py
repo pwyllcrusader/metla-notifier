@@ -15,23 +15,25 @@ BOT_CHAT_ID = os.getenv("BOT_CHAT_ID")
 MA_USERNAME = os.getenv("MA_USERNAME")
 MA_PASSWORD = os.getenv("MA_PASSWORD")
 
+
 BOT = telebot.TeleBot(BOT_TOKEN)
 YESTERDAY = datetime.today() - timedelta(days=1)
 
 
 def get_release_links():
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=False)
         page = browser.new_page()
         page.goto("https://metalarea.org")
         # login
-        page.fill("//input[@name='UserName']", MA_USERNAME)
-        page.fill("//input[@name='PassWord']", MA_PASSWORD)
+        page.locator("//input[@name='UserName']").fill(MA_USERNAME)
+        page.locator("//input[@name='PassWord']").fill(MA_PASSWORD)
         page.click("//input[@name='submit']")
         # go to new releases
         page.click("//a[@href='https://metalarea.org/forum/index.php?showforum=2']")
         # show hot releases
         page.select_option("//select[@name='topicfilter']", "hot")
+        page.select_option("//select[@name='prune_day']", "1")
         page.click(
             "//form[@method='post']/input[@class='button'][@value='Ок'][@type='submit']"
         )
@@ -51,7 +53,7 @@ def parse_release(link):
     )
     html = session.get(link).content
     soup = BeautifulSoup(html, features="html.parser")
-    cover_link = soup.select_one("a[href*='audiocovers']")["href"]
+    cover_link = soup.select_one("a[href*='audiocovers']").attrs["href"]
     artist = list(soup.find_all("b", string="Артист")[0].parent.descendants)[4].text
     album = soup.find_all("b", string="Альбом")[0].next_sibling
     year = soup.find_all("b", string="Год")[0].next_sibling
