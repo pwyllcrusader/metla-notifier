@@ -15,13 +15,13 @@ class Release:
     ):
         self.topic = topic
         self.cover_link = cover_link
-        self.artist = artist
-        self.album = album
-        self.year = year
-        self.genre = genre
-        self.country = country
-        self.file = file
-        self.size = size
+        self.artist = artist.replace(":", "").strip()
+        self.album = album.replace(":", "").strip()
+        self.year = year.replace(":", "").strip()
+        self.genre = genre.replace(":", "").strip()
+        self.country = country.replace(":", "").strip()
+        self.file = file.replace(":", "").strip()
+        self.size = size.replace(":", "").strip()
         self.download_links = download_links
         self.uploaded_at = uploaded_at
 
