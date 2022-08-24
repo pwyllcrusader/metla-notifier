@@ -89,12 +89,11 @@ def get_releases_from_ma():
 
 def send_releases(releases_to_send):
     for release in releases_to_send:
-        if release.uploaded_at >= YESTERDAY:
-            print(
-                f"Sending release {release.artist} - {release.album} ({release.year})"
-            )
-            BOT.send_message(BOT_CHAT_ID, release, parse_mode="markdown")
-            sleep(5)
+        print(
+            f"Sending release {release.artist} - {release.album} ({release.year})"
+        )
+        BOT.send_message(BOT_CHAT_ID, release, parse_mode="markdown")
+        sleep(5)
 
 
 if __name__ == "__main__":
