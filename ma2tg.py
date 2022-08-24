@@ -22,7 +22,7 @@ YESTERDAY = datetime.today() - timedelta(days=1)
 
 def get_release_links():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch()
         page = browser.new_page()
         page.goto("https://metalarea.org")
         # login
