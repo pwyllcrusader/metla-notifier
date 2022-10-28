@@ -4,6 +4,8 @@ ENV PYTHONDONTWRITEBYTECODE 1
 
 ENV PYTHONUNBUFFERED 1
 
+RUN apt install ca-certificates
+
 RUN pip install -U pip \
     && pip install poetry
 
