@@ -11,7 +11,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN POETRY_VIRTUALENVS_CREATE=false poetry install
+RUN POETRY_VIRTUALENVS_CREATE=false poetry install --no-dev --no-root -no-interaction --no-ansi
 
 RUN playwright install chromium
 
