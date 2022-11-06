@@ -15,6 +15,4 @@ COPY . .
 
 RUN poetry install
 
-RUN playwright install
-
 ENTRYPOINT [ "poetry", "run", "python", "./ma2tg.py" ]
