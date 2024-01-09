@@ -15,6 +15,6 @@ COPY . .
 
 RUN poetry install
 
-RUN playwright install --with-deps chromium
+RUN poetry run playwright install --with-deps chromium
 
 ENTRYPOINT [ "poetry", "run", "python", "./ma2tg.py" ]
