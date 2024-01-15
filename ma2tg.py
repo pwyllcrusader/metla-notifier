@@ -24,13 +24,13 @@ def get_release_links():
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
-        page.goto("http://metalarea.org")
+        page.goto("https://metalarea.org", wait_until="domcontentloaded")
         # login
         page.locator("//input[@name='UserName']").fill(MA_USERNAME)
         page.locator("//input[@name='PassWord']").fill(MA_PASSWORD)
         page.click("//input[@name='submit']")
         # go to new releases
-        page.click("//a[@href='http://metalarea.org/forum/index.php?showforum=2']")
+        page.click("//a[@href='https://metalarea.org/forum/index.php?showforum=2']")
         # show hot releases
         page.select_option("//select[@name='topicfilter']", "hot")
         page.select_option("//select[@name='prune_day']", "1")
@@ -48,7 +48,7 @@ def parse_release(link):
     auth = {"UserName": MA_USERNAME, "PassWord": MA_PASSWORD}
     session = requests.session()
     session.post(
-        "http://metalarea.org/forum/index.php?act=Login&CODE=01&CookieDate=1&return=https://metalarea.org",
+        "https://metalarea.org/forum/index.php?act=Login&CODE=01&CookieDate=1&return=https://metalarea.org",
         data=auth,
     )
     html = session.get(link).content
